@@ -1,13 +1,13 @@
 ## Objectif :
 
-Dans un premier temps, il f&aut créer une application flask qui, à partir de l'API OpenWeatherMap (et d'autres potentiellement), va récupérer les données météorologiques d'un point mais aussi l'élévation du terrain associée à ce point, traiter ces données et donner des instructions au drône sur son comportement en fonction de la météo et d'autres facteurs comme la proximité avec des aéroports ou encore d'autres zones à éviter, dangereuses ou interdites. Les aéroports doivent être évités dans un rayon de 8km. 
+Dans un premier temps, il faut créer une application flask qui, à partir de l'API OpenWeatherMap (et d'autres potentiellement), va récupérer les données météorologiques d'un point mais aussi l'élévation du terrain associée à ce point, traiter ces données et donner des instructions au drône sur son comportement en fonction de la météo et d'autres facteurs comme la proximité avec des aéroports ou encore d'autres zones à éviter, dangereuses ou interdites. Les aéroports doivent être évités dans un rayon de 8km. 
 
 ### Etapes :
 
 1) Créer une application Flask qui récupère les données météo et l'élévation du terrain à partir de l'API OpenWeatherMap.
-2) Créer un point de terminaison (endpoint) dans votre application Flask qui prend les coordonnées d'un point et renvoie la météo de ce point.
-3) Récupérer une base de données MySQL contenant tous les aéroports en Espagne de votre tuteur.
-4) Ajouter une fonctionnalité à votre application Flask pour vérifier la distance à partir des coordonnées sélectionnées et trouver les aéroports les plus proches (à moins de 8 km).
+2) Créer un point de terminaison (endpoint) dans l'application Flask qui prend les coordonnées d'un point et renvoie la météo de ce point.
+3) Récupérer une base de données MySQL contenant tous les aéroports en Espagne.
+4) Ajouter une fonctionnalité à l'application Flask pour vérifier la distance à partir des coordonnées sélectionnées et trouver les aéroports les plus proches (à moins de 8 km).
 5) Préparer une réponse avec toutes les données demandées (météo, élévation du terrain et aéroports les plus proches).
 
 ### Conseils :
