@@ -27,6 +27,10 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `airports`
 --
 
+CREATE USER 'zoe'@'localhost' IDENTIFIED BY 'rohu';
+
+GRANT ALL PRIVILEGES ON airports.* TO 'zoe'@'localhost';
+
 CREATE TABLE `airports` (
   `id` int(11) NOT NULL,
   `code` varchar(50) COLLATE utf8_turkish_ci DEFAULT NULL,
