@@ -9,10 +9,17 @@ import mysql.connector
 #from tensorflow.keras.layers import Dense
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://zoe:rohu@localhost/airports'
+
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'zoe'
+# app.config['MYSQL_PASSWORD'] = 'rohu'
+# app.config['MYSQL_DB'] = 'meetdrone4'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://zoecostan:565399@localhost:3306/meetdrone4'
+
 db = SQLAlchemy(app)
 
 class Airport(db.Model):
+    __tablename__ = 'airports'
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(50))
     name = db.Column(db.String(200))
@@ -31,7 +38,7 @@ class Airport(db.Model):
 
 @app.route('/')
 def hello():
-    return 'Ajouter longitude et latitude à la requête afin d observer des résultats.'
+    return 'Add parameters to the request (lon, lat)'
 
 @app.route('/forecast/<lat>/<lng>')
 def process_forecast(lat, lng):
@@ -62,7 +69,6 @@ def process_forecast(lat, lng):
 def check_airport(latitude, longitude):
     latitude = float(latitude)
     longitude = float(longitude)
-
 
     # Interroger la base de données pour trouver les aéroports à moins de 8 km
     airports = Airport.query.filter(
