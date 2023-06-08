@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import requests
 from flask_sqlalchemy import SQLAlchemy
 import json
+import math
 
 import mysql.connector
 #import tensorflow as tf
@@ -70,22 +71,40 @@ def check_airport(latitude, longitude):
     latitude = float(latitude)
     longitude = float(longitude)
 
-    # Interroger la base de données pour trouver les aéroports à moins de 8 km
-    airports = Airport.query.filter(
-        Airport.lat.between(latitude - 0.072, latitude + 0.072),
-        Airport.lon.between(longitude - 0.072, longitude + 0.072)
-    ).all()
+    # Interroger la base de données pour trouver les aéroports
+    airports = Airport.query.all()
 
-    if airports:
-        message = "Veuillez vous éloigner de l'aéroport."
+    # Vérifier la distance entre chaque aéroport et les coordonnées fournies
+    for airport in airports:
+        airport_latitude = float(airport.lat)
+        airport_longitude = float(airport.lon)
+        distance = haversineGreatCircleDistance(latitude, longitude, airport_latitude, airport_longitude)
+        
+        if distance <= 8000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
+            message = "Veuillez vous éloigner de l'aéroport."
+            break
     else:
         message = "Vous êtes à une distance sécuritaire de l'aéroport."
 
-    response = {
-        'message': message
-    }
-
     return jsonify(response)
+
+def haversineGreatCircleDistance(latitudeFrom, longitudeFrom, latitudeTo, longitudeTo):
+    # convertir de degrés à radians
+    earthRadius = 6371000
+    latFrom = math.radians(latitudeFrom)
+    lonFrom = math.radians(longitudeFrom)
+    latTo = math.radians(latitudeTo)
+    lonTo = math.radians(longitudeTo)
+
+    latDelta = latTo - latFrom
+    lonDelta = lonTo - lonFrom
+
+    angle = 2 * math.asin(math.sqrt(math.pow(math.sin(latDelta / 2), 2) +
+                     math.cos(latFrom) * math.cos(latTo) * math.pow(math.sin(lonDelta / 2), 2)))
+    distance = angle * earthRadius
+
+    return round(distance, 2)
+
 
 
 if __name__ == '__main__':
