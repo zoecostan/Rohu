@@ -74,6 +74,8 @@ def check_airport(latitude, longitude):
     # Interroger la base de données pour trouver les aéroports
     airports = Airport.query.all()
 
+     message = "Vous êtes à une distance sécuritaire de l'aéroport."
+
     # Vérifier la distance entre chaque aéroport et les coordonnées fournies
     for airport in airports:
         airport_latitude = float(airport.lat)
@@ -83,8 +85,7 @@ def check_airport(latitude, longitude):
         if distance <= 8000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
             message = "Veuillez vous éloigner de l'aéroport."
             break
-    else:
-        message = "Vous êtes à une distance sécuritaire de l'aéroport."
+   y
 
     return jsonify(response)
 
