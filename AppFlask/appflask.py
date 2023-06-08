@@ -58,15 +58,16 @@ def process_forecast(lat, lng):
 #La réponse de l'API est obtenue en appelant .json() sur l'objet de réponse, ce qui renvoie les données de prévision au format JSON.
 #Enfin, les données de prévision sont renvoyées en tant que réponse JSON à l'appelant de la requête.
 
-@app.route('/check_airport', methods=['GET'])
-def check_airport():
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
+@app.route('/check_airport/<latitude>/<longitude>', methods=['GET'])
+def check_airport(latitude, longitude):
+    latitude = float(latitude)
+    longitude = float(longitude)
+
 
     # Interroger la base de données pour trouver les aéroports à moins de 8 km
     airports = Airport.query.filter(
-        Airport.latitude.between(latitude - 0.072, latitude + 0.072),
-        Airport.longitude.between(longitude - 0.072, longitude + 0.072)
+        Airport.lat.between(latitude - 0.072, latitude + 0.072),
+        Airport.lon.between(longitude - 0.072, longitude + 0.072)
     ).all()
 
     if airports:
