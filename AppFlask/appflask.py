@@ -74,7 +74,7 @@ def check_airport(latitude, longitude):
     # Interroger la base de données pour trouver les aéroports
     airports = Airport.query.all()
 
-     message = "Vous êtes à une distance sécuritaire de l'aéroport."
+    response = {}  # Initialiser la variable de réponse
 
     # Vérifier la distance entre chaque aéroport et les coordonnées fournies
     for airport in airports:
@@ -83,12 +83,51 @@ def check_airport(latitude, longitude):
         distance = haversineGreatCircleDistance(latitude, longitude, airport_latitude, airport_longitude)
         
         if distance <= 8000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
-            message = "Veuillez vous éloigner de l'aéroport."
+            response['message'] = "Veuillez vous éloigner de l'aéroport."
             break
-   y
+    else:
+        response['message'] = "Vous êtes à une distance sécuritaire de l'aéroport."
+
 
     return jsonify(response)
 
+@app.route('/allinfo/<latitude>/<longitude>', methods=['GET'])
+def all_info(latitude, longitude):
+    latitude = float(latitude)
+    longitude = float(longitude)
+
+    api_key = 'b1723b95bdb54629c30ac93f1bfe77c2'
+    url = f'https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&units=metric&appid={api_key}'
+
+    responseforecast = requests.get(url)
+    forecast = responseforecast.json()
+
+    # Interroger la base de données pour trouver les aéroports
+    airports = Airport.query.all()
+
+    response = {}  # Initialiser la variable de réponse
+
+    # Vérifier la distance entre chaque aéroport et les coordonnées fournies
+    for airport in airports:
+        airport_latitude = float(airport.lat)
+        airport_longitude = float(airport.lon)
+        distance = haversineGreatCircleDistance(latitude, longitude, airport_latitude, airport_longitude)
+        
+        if distance <= 8000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
+            response['message'] = f"Please stay at least 8 km from the airport {airport.name}. You are at {distance}m."
+            break
+    else:
+        response['message'] = "Distance from airports is OK."
+
+    # Créer le dictionnaire contenant forecast et response
+    result = {
+        'forecast': forecast,
+        'airports': response
+    }
+
+    return jsonify(result)
+
+   
 def haversineGreatCircleDistance(latitudeFrom, longitudeFrom, latitudeTo, longitudeTo):
     # convertir de degrés à radians
     earthRadius = 6371000
