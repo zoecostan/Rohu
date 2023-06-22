@@ -105,7 +105,7 @@ def all_info(latitude, longitude):
     # Interroger la base de données pour trouver les aéroports
     airports = Airport.query.all()
 
-    response = {}  # Initialiser la variable de réponse
+    geofence = {'value': False}  # Initialiser la variable geofence
 
     # Vérifier la distance entre chaque aéroport et les coordonnées fournies
     for airport in airports:
@@ -113,16 +113,22 @@ def all_info(latitude, longitude):
         airport_longitude = float(airport.lon)
         distance = haversineGreatCircleDistance(latitude, longitude, airport_latitude, airport_longitude)
         
-        if distance <= 8000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
-            response['message'] = f"Please stay at least 8 km from the airport {airport.name}. You are at {distance}m."
+        if distance <= 12000:  # Vérifier si la distance est inférieure ou égale à 8000 mètres (8 km)
+            geofence['value'] = True
+            geofence['airport'] = {
+                'name': airport.name,
+                'latitude': airport_latitude,
+                'longitude': airport_longitude,
+                'distance': f"{distance}m"
+            }            
             break
     else:
-        response['message'] = "Distance from airports is OK."
+        geofence['value'] = False
 
     # Créer le dictionnaire contenant forecast et response
     result = {
         'forecast': forecast,
-        'airports': response
+        'geofence': geofence
     }
 
     return jsonify(result)
