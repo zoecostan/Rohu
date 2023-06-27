@@ -3,18 +3,15 @@ import requests
 from flask_sqlalchemy import SQLAlchemy
 import json
 import math
+import numpy as np
 
-import mysql.connector
-#import tensorflow as tf
-#from tensorflow.keras.models import Sequential
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+# from tensorflow.keras.models import Sequential
 #from tensorflow.keras.layers import Dense
 
 app = Flask(__name__)
 
-# app.config['MYSQL_HOST'] = 'localhost'
-# app.config['MYSQL_USER'] = 'zoe'
-# app.config['MYSQL_PASSWORD'] = 'rohu'
-# app.config['MYSQL_DB'] = 'meetdrone4'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://zoecostan:565399@localhost:3306/meetdrone4'
 
 db = SQLAlchemy(app)
@@ -35,11 +32,12 @@ class Airport(db.Model):
     city = db.Column(db.Enum('true', 'false'))
 
 # Carga el modelo de TensorFlow entrenado
-#model = tf.keras.models.load_model('modelo.h5')
+model = tf.keras.models.load_model('model.h5')
 
 @app.route('/')
 def hello():
     return 'Add parameters to the request (lon, lat)'
+
 
 @app.route('/forecast/<lat>/<lng>')
 def process_forecast(lat, lng):
@@ -48,16 +46,42 @@ def process_forecast(lat, lng):
 
     response = requests.get(url)
     forecast = response.json()
-    #weather_description = forecast["weather"][0]["description"]
-    #input_data = [1 if "rain" in weather_description else 0]
-    #prediction = model.predict([input_data])
-   
-    #if prediction[0] >= 0.5:
-    #    result = "El drone debe aterrizar."
-    #else:
-    #    result = "El drone puede seguir volando."
-   
-    return jsonify({'result': forecast})
+    weather_description = forecast["weather"][0]["description"]
+
+    # Assumer une valeur de 1 pour "rain" dans weather_description, sinon 0
+    input_data = [0, 0, 0, 0]
+
+    # Récupérer les paramètres avec des valeurs par défaut de None
+    temperature = request.args.get('temperature')
+    humidity = request.args.get('humidity')
+    wind_speed = request.args.get('wind_speed')
+    cloudiness = request.args.get('cloudiness')
+
+    # Convertir les valeurs en float si elles ne sont pas None
+    if temperature is not None:
+        input_data[0] = float(temperature)
+    if humidity is not None:
+        input_data[1] = float(humidity)
+    if wind_speed is not None:
+        input_data[2] = float(wind_speed)
+    if cloudiness is not None:
+        input_data[3] = float(cloudiness)
+
+    # Créer un tableau NumPy avec les valeurs d'entrée
+    input_data = np.array(input_data, dtype=np.float32)
+
+    # Assurez-vous que les données d'entrée ont la bonne forme
+    input_data = np.expand_dims(input_data, axis=0)
+
+    # Prédiction du modèle
+    prediction = model.predict(input_data)[0]
+
+    if prediction >= 0.5:
+        result = "El drone debe aterrizar."
+    else:
+        result = "El drone puede seguir volando."
+
+    return jsonify({'result': forecast, 'decision': result})
 
 #La fonction process_forecast est définie en tant que point de terminaison (endpoint) de votre application Flask avec la route /forecast/<lat>/<lng>.
 #Lorsqu'une requête est effectuée à cette route avec des valeurs de latitude et de longitude spécifiées, par exemple /forecast/48.8566/2.3522, Flask récupère ces valeurs et les passe en tant qu'arguments à la fonction process_forecast.
@@ -132,7 +156,6 @@ def all_info(latitude, longitude):
     }
 
     return jsonify(result)
-
    
 def haversineGreatCircleDistance(latitudeFrom, longitudeFrom, latitudeTo, longitudeTo):
     # convertir de degrés à radians
