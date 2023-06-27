@@ -126,6 +126,40 @@ def all_info(latitude, longitude):
     responseforecast = requests.get(url)
     forecast = responseforecast.json()
 
+    # Assumer une valeur de 1 pour "rain" dans weather_description, sinon 0
+    input_data = [0, 0, 0, 0]
+
+    # Récupérer les paramètres avec des valeurs par défaut de None
+    temperature = request.args.get('temperature')
+    humidity = request.args.get('humidity')
+    wind_speed = request.args.get('wind_speed')
+    cloudiness = request.args.get('cloudiness')
+
+    # Convertir les valeurs en float si elles ne sont pas None
+    if temperature is not None:
+        input_data[0] = float(temperature)
+    if humidity is not None:
+        input_data[1] = float(humidity)
+    if wind_speed is not None:
+        input_data[2] = float(wind_speed)
+    if cloudiness is not None:
+        input_data[3] = float(cloudiness)
+
+    # Créer un tableau NumPy avec les valeurs d'entrée
+    input_data = np.array(input_data, dtype=np.float32)
+
+    # Assurez-vous que les données d'entrée ont la bonne forme
+    input_data = np.expand_dims(input_data, axis=0)
+
+    # Prédiction du modèle
+    prediction = model.predict(input_data)[0]
+
+    if prediction >= 0.5:
+        resulttf = "El drone debe aterrizar."
+    else:
+        resulttf = "El drone puede seguir volando."
+
+
     # Interroger la base de données pour trouver les aéroports
     airports = Airport.query.all()
 
@@ -152,7 +186,8 @@ def all_info(latitude, longitude):
     # Créer le dictionnaire contenant forecast et response
     result = {
         'forecast': forecast,
-        'geofence': geofence
+        'geofence': geofence,
+        'decision': resulttf
     }
 
     return jsonify(result)
