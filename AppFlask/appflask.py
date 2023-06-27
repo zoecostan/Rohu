@@ -31,14 +31,15 @@ class Airport(db.Model):
     numAirports = db.Column(db.Integer)
     city = db.Column(db.Enum('true', 'false'))
 
-# Carga el modelo de TensorFlow entrenado
+# Load the trained tf model
 model = tf.keras.models.load_model('model.h5')
 
+# Basic request without parameters
 @app.route('/')
 def hello():
     return 'Add parameters to the request (lon, lat)'
 
-
+# Meteo forecast only
 @app.route('/forecast/<lat>/<lng>')
 def process_forecast(lat, lng):
     api_key = 'b1723b95bdb54629c30ac93f1bfe77c2'
@@ -90,6 +91,7 @@ def process_forecast(lat, lng):
 #La réponse de l'API est obtenue en appelant .json() sur l'objet de réponse, ce qui renvoie les données de prévision au format JSON.
 #Enfin, les données de prévision sont renvoyées en tant que réponse JSON à l'appelant de la requête.
 
+# Geofence only
 @app.route('/check_airport/<latitude>/<longitude>', methods=['GET'])
 def check_airport(latitude, longitude):
     latitude = float(latitude)
@@ -115,6 +117,7 @@ def check_airport(latitude, longitude):
 
     return jsonify(response)
 
+# All previsions (geofence and meteo including tensorflow)
 @app.route('/allinfo/<latitude>/<longitude>', methods=['GET'])
 def all_info(latitude, longitude):
     latitude = float(latitude)
@@ -153,7 +156,6 @@ def all_info(latitude, longitude):
 
     # Prédiction du modèle
     prediction = model.predict(input_data)[0]
-
     if prediction >= 0.5:
         resulttf = "El drone debe aterrizar."
     else:
