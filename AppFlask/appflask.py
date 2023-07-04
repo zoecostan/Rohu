@@ -179,6 +179,14 @@ def login():
         return jsonify(access_token=access_token), 200
     else:
         return jsonify(message='Identifiants invalides'), 401
+    
+#route test pour les access token
+@app.route('/test', methods=['GET'])
+@jwt_required
+def test():
+    user = get_jwt_identity()
+    print(user)
+    return 'Secret data', 200
    
 # Annexe function   
 def haversineGreatCircleDistance(latitudeFrom, longitudeFrom, latitudeTo, longitudeTo):
@@ -202,3 +210,7 @@ def haversineGreatCircleDistance(latitudeFrom, longitudeFrom, latitudeTo, longit
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+#curl -X POST -H "Content-Type: application/json" -d '{"username":"zoecostan","password":"565399"}' http://localhost:5000/login
+
+#curl -X GET -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY4ODQ2ODQ3NywianRpIjoiYzNhN2Y0ODYtYmRkZC00OTYzLTlmNTgtNjhhODc1NjQ0YTk0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InpvZWNvc3RhbiIsIm5iZiI6MTY4ODQ2ODQ3NywiZXhwIjoxNjg4NDY5Mzc3fQ.ipYb2ARRwc6G_BVt-wZobSmZc2o8xZzajNJ5neGDqaQ" http://localhost:5000/test
